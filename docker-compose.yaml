@@ -1,0 +1,41 @@
+version: '3.7'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    networks:
+      - e-commerce-net
+    ports:
+      - 8000:8000
+    environment:
+      - TZ=Asia/Kolkata
+    container_name: server
+    working_dir: /home/apps/e-commerce/
+    volumes:
+      - ~/personal/assignments/e-commerce:/home/apps/e-commerce
+      - node_modules:/home/apps/e-commerce/node_modules
+    depends_on:
+      mongo_db:
+        condition: service_healthy
+    command: npm start
+
+  mongo_db:
+    image: mongo:5.0.8
+    networks:
+      - e-commerce-net
+    container_name: mongo_db
+    ports:
+      - 27017:27017
+    volumes:
+      - ~/personal/dbs/mongo:/data/db
+    command: --quiet --logpath /dev/null
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/healthcheck-database --quiet
+
+networks:
+  e-commerce-net:
+
+volumes:
+  node_modules:
