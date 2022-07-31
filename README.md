@@ -1,4 +1,4 @@
-### Instructions
+## Instructions
 
 1. Install node. Go to the root folder and run
 
@@ -37,7 +37,7 @@ npm start
 docker-compose up --build
 ```
 
-# Or run your docker services separately,
+### Or run your docker services separately,
 
 References,
 ```
