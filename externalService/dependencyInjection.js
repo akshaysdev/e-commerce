@@ -2,12 +2,19 @@ const { Lifetime, createContainer, asValue, asClass } = require('awilix');
 
 const { mongoDb } = require('./mongoDb');
 const { sendEmail } = require('./mailer');
+const { queueBackgroundJobs } = require('./bull');
 
+/**
+ * It creates a container, registers some dependencies, and then loads all the files in the repository
+ * and service directories
+ * @returns A function that returns a container.
+ */
 const Container = () => {
   const container = createContainer();
 
   container.register('mongoDb', asValue(mongoDb));
   container.register('sendEmail', asValue(sendEmail));
+  container.register('queueBackgroundJobs', asValue(queueBackgroundJobs));
 
   const options = {
     cwd: __dirname,

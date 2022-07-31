@@ -42,4 +42,14 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, verify, resendVerification, login };
+const logout = async (req, res) => {
+  try {
+    req.headers.authorization = '';
+
+    res.status(201).json({ status: true, message: 'Logged out' });
+  } catch (error) {
+    res.status(error.status || 500).json(response(error));
+  }
+};
+
+module.exports = { register, verify, resendVerification, login, logout };

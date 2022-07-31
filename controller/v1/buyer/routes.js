@@ -1,14 +1,15 @@
 const express = require('express');
+const { verifyBuyerAuthorization } = require('../../../helpers/authentication');
 
 const buyerRouter = express.Router();
 const buyer = require('./buyer');
 
-buyerRouter.get('/list-of-sellers', buyer.fetchAllSellers);
+buyerRouter.get('/list-of-sellers', verifyBuyerAuthorization, buyer.fetchAllSellers);
 
-buyerRouter.get('/catalog/:sellerId', buyer.fetchCatalog);
+buyerRouter.get('/catalog/:sellerId', verifyBuyerAuthorization, buyer.fetchCatalog);
 
-buyerRouter.post('/create-order/:sellerId', buyer.createOrder);
+buyerRouter.post('/create-order/:sellerId', verifyBuyerAuthorization, buyer.createOrder);
 
-buyerRouter.get('/orders/:buyerId', buyer.fetchAllOrders);
+buyerRouter.get('/orders/:buyerId', verifyBuyerAuthorization, buyer.fetchAllOrders);
 
 module.exports = { buyerRouter };

@@ -6,6 +6,11 @@ module.exports = class CatalogRepository {
     this.repository = CatalogSchema(mongoDb);
   }
 
+  /**
+   * This function creates a new catalog object and returns it
+   * @param catalogObject - The object that will be created in the database.
+   * @returns The catalog object
+   */
   async create(catalogObject) {
     try {
       const catalog = await this.repository.create(catalogObject);
@@ -17,6 +22,11 @@ module.exports = class CatalogRepository {
     }
   }
 
+  /**
+   * Finds a catalog by sellerId
+   * @param sellerId - The sellerId of the catalog to find.
+   * @returns The catalog object
+   */
   async findBySellerId(sellerId) {
     try {
       const catalog = await this.repository.findOne({ sellerId });
@@ -28,6 +38,11 @@ module.exports = class CatalogRepository {
     }
   }
 
+  /**
+   * Finds a catalog by its id
+   * @param catalogId - The id of the catalog to find.
+   * @returns The catalog object
+   */
   async findById(catalogId) {
     try {
       const catalog = await this.repository.findOne({ catalogId });
@@ -39,6 +54,11 @@ module.exports = class CatalogRepository {
     }
   }
 
+  /**
+   * It fetches all the products for a given sellerId
+   * @param sellerId - The sellerId of the seller whose catalog you want to fetch.
+   * @returns An array of catalogs with products
+   */
   async fetchAllProductsBySellerId(sellerId) {
     try {
       const query = fetchAllProductsForCatalog(sellerId);

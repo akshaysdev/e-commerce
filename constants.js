@@ -6,8 +6,23 @@ const hash = {
 };
 
 const userType = {
-  BUYER: 'Buyer',
-  SELLER: 'Seller',
+  BUYER: 'BUYER',
+  SELLER: 'SELLER',
+  DELIVERY_PARTNER: 'DELIVERY PARTNER',
 };
 
-module.exports = { hash, userType };
+const jobType = {
+  delivery: { name: 'delivery', concurrency: 1 },
+  verification: { name: 'verification', concurrency: 1 },
+  product: { name: 'product', concurrency: 1 },
+  confirmation: { name: 'confirmation', concurrency: 1 },
+};
+
+const tokenAge = '1d';
+
+const orderStatus = {
+  DELIVERED: true,
+  NOT_DELIVERED: false,
+}
+
+module.exports = { hash, userType, orderStatus, jobType, tokenAge };

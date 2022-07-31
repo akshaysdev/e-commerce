@@ -1,5 +1,6 @@
 const Schema = require('mongoose').Schema;
 
+/* Creating a new schema for the Catalog model. */
 const CatalogSchema = new Schema(
   {
     name: {

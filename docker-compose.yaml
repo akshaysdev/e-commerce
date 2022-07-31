@@ -4,7 +4,7 @@ services:
   server:
     build:
       context: .
-      dockerfile: dev.Dockerfile
+      dockerfile: server.Dockerfile
     networks:
       - e-commerce-net
     ports:
@@ -19,6 +19,10 @@ services:
     depends_on:
       mongo_db:
         condition: service_healthy
+      redis_db:
+        condition: service_started
+      redis-commander:
+        condition: service_started
     command: npm start
 
   mongo_db:
@@ -33,6 +37,29 @@ services:
     command: --quiet --logpath /dev/null
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/healthcheck-database --quiet
+
+  redis_db:
+    image: redis:latest
+    networks:
+      - e-commerce-net
+    container_name: redis_db
+    volumes:
+      - ~/personal/dbs/redis:/data
+    ports:
+      - 6379:6379
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    networks:
+      - e-commerce-net
+    environment:
+      - REDIS_HOSTS=redis:redis_db:6379
+    container_name: redis-commander
+    ports:
+      - 8081:8081
+    depends_on:
+      redis_db:
+        condition: service_started
 
 networks:
   e-commerce-net:

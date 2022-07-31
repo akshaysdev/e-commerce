@@ -1,18 +1,23 @@
 const nodemailer = require('nodemailer');
 
+/**
+ * It sends an email to the given email address with the given content
+ * @param email - The email address of the user to send the email to.
+ * @param content - The content of the email.
+ */
 const sendEmail = async (email, content) => {
   try {
     const transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST,
-      port: process.env.MAIL_PORT,
+      host: process.env.MAILER_HOST,
+      port: process.env.MAILER_PORT,
       auth: {
-        user: process.env.MAIL_USERNAME,
-        pass: process.env.MAIL_PASSWORD,
+        user: process.env.MAILER_USERNAME,
+        pass: process.env.MAILER_PASSWORD,
       },
     });
 
     await transporter.sendMail({
-      from: process.env.MAIL_ADMIN,
+      from: process.env.MAILER_ADMIN,
       to: email,
       subject: content.subject,
       html: content.html,

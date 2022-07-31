@@ -1,16 +1,21 @@
 const createError = require('http-errors');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 
 const { validatePassword, validateEmail } = require('../../helpers/user');
-const { verifyEmailContent } = require('../../helpers/authentication');
-const { hash } = require('../../constants');
+const { verificationEmailContent } = require('../../helpers/authentication');
+const { hash, jobType } = require('../../constants');
 
 module.exports = class UserService {
-  constructor({ userRepository, sendEmail }) {
+  constructor({ userRepository, queueBackgroundJobs, emailService }) {
     this.userRepository = userRepository;
-    this.sendEmail = sendEmail;
+    this.queueBackgroundJobs = queueBackgroundJobs;
+    this.emailService = emailService;
   }
 
+  /**
+   * It validates the user's input and throws an error if the input is invalid
+   */
   async validateUser({ name, email, password, type }) {
     try {
       if (!name) {
@@ -43,6 +48,10 @@ module.exports = class UserService {
     }
   }
 
+  /**
+   * It validates the user object, creates a token, hashes the password, and then creates the user
+   * @param userObject - The user object that is passed to the register function.
+   */
   async register(userObject) {
     try {
       await this.validateUser(userObject);
@@ -55,14 +64,24 @@ module.exports = class UserService {
         .toString(`hex`);
       userObject.password = hashedPassword;
 
-      userObject.type = userObject.type.charAt(0).toUpperCase() + userObject.type.substring(1);
+      userObject.type = userObject.type.toUpperCase();
+      userObject.location = userObject.location.toUpperCase();
 
       const user = await this.userRepository.create(userObject);
 
       if (user) {
-        const content = verifyEmailContent(user._id, token);
+        const meta = {
+          _id: user._id,
+          token: user.token,
+          email: user.email,
+        };
 
-        await this.sendEmail(user.email, content);
+        this.queueBackgroundJobs({
+          name: jobType.verification.name,
+          className: this.emailService,
+          functionName: this.emailService.sendMail,
+          meta,
+        });
       }
 
       return { status: true, message: 'Verification link has been sent to your email' };
@@ -72,6 +91,14 @@ module.exports = class UserService {
     }
   }
 
+  /**
+   * It takes a userId and a token, finds the user in the database, checks if the user is already
+   * verified, if not, checks if the token matches the one in the database, and if it does, marks the
+   * user as verified
+   * @param userId - The user's id
+   * @param token - The token that was sent to the user's email address.
+    * @returns A message indicating if the user was verified or not.
+   */
   async verify(userId, token) {
     try {
       const user = await this.userRepository.findById(userId);
@@ -97,6 +124,11 @@ module.exports = class UserService {
     }
   }
 
+  /**
+   * It takes a userId, finds the user, generates a token, updates the user with the token, and then
+   * queues a background job to send an email to the user with the token
+   * @param userId - The userId of the user who needs to be verified.
+   */
   async resendVerification(userId) {
     try {
       const user = await this.userRepository.findById(userId);
@@ -109,9 +141,18 @@ module.exports = class UserService {
       await this.userRepository.updateToken(userId, token);
 
       if (user) {
-        const content = verifyEmailContent(userId, token);
+        const meta = {
+          _id: userId,
+          token,
+          email: user.email,
+        };
 
-        await this.sendEmail(user.email, content);
+        this.queueBackgroundJobs({
+          name: jobType.verification.name,
+          className: this.emailService,
+          functionName: this.emailService.sendMail,
+          meta,
+        });
       }
 
       return { status: true, message: 'Resent verification link to the email' };
@@ -121,6 +162,12 @@ module.exports = class UserService {
     }
   }
 
+  /**
+   * It takes in an email and password, finds the user in the database, checks if the user is verified,
+   * hashes the password, compares the hashed password with the one in the database, and if they match,
+   * it returns a status of true, a message of 'User logged in', and an access token
+   * @returns A message with the status of the login, and the access token
+   */
   async login({ email, password }) {
     try {
       const user = await this.userRepository.findByEmail(email);
@@ -136,11 +183,15 @@ module.exports = class UserService {
         .pbkdf2Sync(password, hash.SALT, hash.ITERATIONS, hash.KEY_LEN, hash.DIGEST)
         .toString(`hex`);
 
-      if (user.password !== hashedPassword) {
-        throw createError(422, 'Invalid password');
+      if (user.password !== hashedPassword || user.email !== email) {
+        throw createError(422, 'Invalid user credentials');
       }
 
-      return { status: true, message: 'User logged in', name: user.name, email: user.email, _id: user._id };
+      const accessToken = jwt.sign({ user: { _id: user._id, type: user.type } }, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: '1h',
+      });
+
+      return { status: true, message: 'User logged in', accessToken };
     } catch (error) {
       error.meta = { ...error.meta, 'UserService.login': { email, password } };
       throw error;

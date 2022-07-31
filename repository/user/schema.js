@@ -1,5 +1,8 @@
 const Schema = require('mongoose').Schema;
 
+const { userType } = require('../../constants');
+
+/* Creating a schema for the user model. */
 const UserSchema = new Schema(
   {
     name: {
@@ -16,8 +19,22 @@ const UserSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ['Seller', 'Buyer'],
+      enum: Object.values(userType),
       required: true,
+    },
+    location: {
+      type: String,
+      required: true,
+    },
+    token: {
+      type: String,
+      required: true,
+      default: null,
+    },
+    activeOrders: {
+      type: Array(Schema.Types.ObjectId),
+      ref: 'Order',
+      default: []
     },
     verified: {
       type: Boolean,
@@ -26,6 +43,8 @@ const UserSchema = new Schema(
   },
   { timestamps: true }
 );
+
+UserSchema.index({ type: 1 });
 
 module.exports = (mongoDb) => {
   return mongoDb.model('User', UserSchema);

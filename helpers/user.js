@@ -1,5 +1,10 @@
 const createError = require('http-errors');
 
+/**
+ * Password must contain minimum 6 characters, one uppercase letter, one lowercase letter, one number
+ * and one special character
+ * @param password - The password to validate.
+ */
 const validatePassword = (password) => {
   const regex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
 
@@ -12,6 +17,10 @@ const validatePassword = (password) => {
   }
 };
 
+/**
+ * It checks if the email is a valid email address
+ * @param email - The email address to validate
+ */
 const validateEmail = (email) => {
   const regex =
     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -20,4 +29,13 @@ const validateEmail = (email) => {
   }
 };
 
-module.exports = { validatePassword, validateEmail };
+/**
+ * It returns true if the name has a special character, and false if it doesn't
+ * @param name - The name of the person.
+ * @returns a boolean value.
+ */
+const hasSpecialCharacter = (name) => {
+  return name.match(/[^\w\s]/gi, '')?.length ? true : false;
+};
+
+module.exports = { validatePassword, validateEmail, hasSpecialCharacter };

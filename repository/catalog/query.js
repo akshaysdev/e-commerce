@@ -1,5 +1,10 @@
 const { ObjectId } = require('mongoose').Types;
 
+/**
+ * It fetches all the products for a given sellerId, and filters out the products that are out of stock
+ * @param sellerId - The seller's ID.
+ * @returns An array of objects with the seller's catalog and the products that are in stock.
+ */
 const fetchAllProductsForCatalog = (sellerId) => {
   return [
     { $match: { sellerId: ObjectId(sellerId) } },

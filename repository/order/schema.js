@@ -1,5 +1,6 @@
 const Schema = require('mongoose').Schema;
 
+/* Creating a schema for the order model. */
 const OrderSchema = new Schema(
   {
     sellerId: {
@@ -12,11 +13,22 @@ const OrderSchema = new Schema(
       ref: 'User',
       required: true,
     },
-    productIds: {
-      type: Array(Schema.Types.ObjectId),
-      ref: 'Product',
-      required: true,
+    isDelivered: {
+      type: Boolean,
+      default: false,
     },
+    deliveryPartnerId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    products: [
+      {
+        _id: false,
+        productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+        quantity: { type: Number, required: true },
+      },
+    ],
     totalPrice: {
       type: Number,
       required: true,
