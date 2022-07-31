@@ -45,6 +45,7 @@ d = runs a detached container
 rm = removes the container when the respective server is stopped
 v = volume
 p = port
+t = tag
 ```
 
 ```bash

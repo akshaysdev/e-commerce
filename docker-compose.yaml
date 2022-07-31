@@ -48,19 +48,6 @@ services:
     ports:
       - 6379:6379
 
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    networks:
-      - e-commerce-net
-    environment:
-      - REDIS_HOSTS=redis:redis_db:6379
-    container_name: redis-commander
-    ports:
-      - 8081:8081
-    depends_on:
-      redis_db:
-        condition: service_started
-
 networks:
   e-commerce-net:
 
