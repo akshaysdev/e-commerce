@@ -1,6 +1,11 @@
 ## Instructions
 
-1. Install node. Go to the root folder and run
+1. Install node and install nvm. Go to the root folder and run
+
+```bash
+nvm use
+```
+then,
 
 ```bash
 npm install
