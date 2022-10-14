@@ -14,12 +14,14 @@ services:
     container_name: server
     working_dir: /home/apps/e-commerce/
     volumes:
-      - ~/personal/assignments/e-commerce:/home/apps/e-commerce
+      - ~/Developer/projects/e-commerce:/home/apps/e-commerce
       - node_modules:/home/apps/e-commerce/node_modules
     depends_on:
       mongo_db:
         condition: service_healthy
       redis_db:
+        condition: service_started
+      mailcatcher:
         condition: service_started
     command: npm start
 
@@ -31,10 +33,19 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - ~/personal/dbs/mongo:/data/db
+      - ~/Developer/dbs/mongo:/data/db
     command: --quiet --logpath /dev/null
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/healthcheck-database --quiet
+
+  mailcatcher:
+    image:  schickling/mailcatcher
+    networks:
+      - e-commerce-net
+    container_name: mailcatcher
+    ports:
+      - 1080:1080
+      - 1025:1025
 
   redis_db:
     image: redis:latest
@@ -42,7 +53,7 @@ services:
       - e-commerce-net
     container_name: redis_db
     volumes:
-      - ~/personal/dbs/redis:/data
+      - ~/Developer/dbs/redis:/data
     ports:
       - 6379:6379
 
