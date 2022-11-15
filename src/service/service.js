@@ -1,4 +1,4 @@
-const { container } = require('../externalService/dependencyInjection');
+const { container } = require('../utils/dependencyInjection');
 
 const userService = container.resolve('userService');
 
